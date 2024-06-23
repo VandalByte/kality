@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 #include <unistd.h>
+#include <fstream>
 
 
 // ANSI COLOR CODES
@@ -166,9 +167,9 @@ void uninstall(std::vector<std::string> pkgs) {
 }
 
 // Function to remove the kali keyring
-void removeKeyring(std::string keyring) {
+void removeKeyring(std::string keyringPkg) {
     std::cout << "Removing the Kali keyring from the system...";
-    std::string cmd = "dpkg --purge " + keyring;
+    std::string cmd = "dpkg --purge " + keyringPkg;
 
     int out = std::system(cmd.c_str());
     if (out != 0) {
@@ -176,4 +177,29 @@ void removeKeyring(std::string keyring) {
         return;
     }
     std::cout << "[INFO] Kali keyring removed successfully!" << std::endl;
+}
+
+
+
+// Function to create a preference file and set priority
+// --> Must be in lower priority to avoid conflict between similar packages
+void changeKeyringPriority(){
+    const std::string filePath = "/etc/apt/preferences.d/kali.pref";
+    const std::string content = 
+        "Package: *\n"
+        "Pin: release a=kali-rolling\n"
+        "Pin-Priority: 50\n";
+    // Opening and writing to file
+    std::ofstream outfile(filePath);
+    if (!outfile.is_open()) {
+        std::cerr << "[ERROR] Can't open the file 'kali.pref'." << std::endl;
+        return;
+    }
+
+    outfile << content;
+    if (!outfile.good()) {
+        std::cerr << "Error writing to the file." << std::endl;
+    }
+
+    outfile.close();
 }
