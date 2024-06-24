@@ -31,7 +31,6 @@ namespace Color {
 }
 
 // FUNCTION PROTOTYPES
-
 bool isRoot();
 void help();
 void update();
@@ -39,8 +38,11 @@ void install(std::vector<std::string> pkgs);
 void uninstall(std::vector<std::string> pkgs);
 std::vector<std::string> getArgs(int argc, char* argv[]);
 
-// MAIN RUNNER
+// KEYRING URL
+const std::string KEYRING_URL = "https://http.kali.org/kali/pool/main/k/kali-archive-keyring/kali-archive-keyring_2024.1_all.deb";
 
+
+// MAIN RUNNER
 int main(int argc, char* argv[]) {
     // check if program is run as root user
     if (!isRoot()) {
@@ -98,6 +100,7 @@ int main(int argc, char* argv[]) {
     return 0;
 }
 
+
 // FUNCTIONS
 
 // Function to sort the given arguments with required format
@@ -126,11 +129,13 @@ std::vector<std::string> getArgs(int argc, char* argv[]) {
     return packages;
 }
 
+
 // Function to check whether the script excecuted with sudo privileges
 bool isRoot() {
     // if effective user ID is 0 (root)
     return (geteuid() == 0);
 }
+
 
 // Function to display the help
 void help() {
@@ -142,11 +147,13 @@ void help() {
     std::cout << "  help (h)\t\t\t\tDisplays this help message and exits\n\n";
 }
 
+
 // Function to update the packages
 void update() {
     std::cout << "Update operation started..." << std::endl;
     // Update logic here...
 }
+
 
 // Function to install the packages
 void install(std::vector<std::string> pkgs) {
@@ -157,6 +164,7 @@ void install(std::vector<std::string> pkgs) {
     std::cout << std::endl;
 }
 
+
 // Function to uninstall the packages
 void uninstall(std::vector<std::string> pkgs) {
     std::cout << "Uninstall operation started..." << std::endl;
@@ -165,6 +173,7 @@ void uninstall(std::vector<std::string> pkgs) {
     }
     std::cout << std::endl;
 }
+
 
 // Function to remove the kali keyring
 void removeKeyring(std::string keyringPkg) {
@@ -178,7 +187,6 @@ void removeKeyring(std::string keyringPkg) {
     }
     std::cout << "[INFO] Kali keyring removed successfully!" << std::endl;
 }
-
 
 
 // Function to create a preference file and set priority
@@ -202,4 +210,29 @@ void changeKeyringPriority(){
     }
 
     outfile.close();
+}
+
+
+// Function to download and install Kali keyring
+void getKeyring() {
+    // downloading the keuring
+    std::cout << "Downloading and installing Kali keyring..." << std::endl;
+    std::string wgetCmd = "wget " + KEYRING_URL;
+    if (system(wgetCmd.c_str()) != 0) {
+        std::cerr << "[ERROR] Failed to download the keyring." << std::endl;
+        return;
+    }
+    // installing the keyring
+    std::string pkgFile = KEYRING_URL.substr(KEYRING_URL.find_last_of("/") + 1);
+    std::string dpkgCmd = "sudo dpkg -i " + pkgFile;
+    if (system(dpkgCmd.c_str()) != 0) {
+        std::cerr << "[ERROR] Failed to install the keyring." << std::endl;
+        return;
+    }
+    // removing the keyring .deb file after installation
+    if (remove(pkgFile.c_str()) != 0) {
+        std::cerr << "[ERROR] Failed to remove the keyring file." << std::endl;
+        return;
+    }
+    std::cout << "[INFO] Kali keyring installed successfully." << std::endl;
 }
