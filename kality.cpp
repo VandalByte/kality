@@ -189,30 +189,6 @@ void removeKeyring(std::string keyringPkg) {
 }
 
 
-// Function to create a preference file and set priority
-// --> Must be in lower priority to avoid conflict between similar packages
-void changeKeyringPriority(){
-    const std::string filePath = "/etc/apt/preferences.d/kali.pref";
-    const std::string content = 
-        "Package: *\n"
-        "Pin: release a=kali-rolling\n"
-        "Pin-Priority: 50\n";
-    // Opening and writing to file
-    std::ofstream outfile(filePath);
-    if (!outfile.is_open()) {
-        std::cerr << "[ERROR] Can't open the file 'kali.pref'." << std::endl;
-        return;
-    }
-
-    outfile << content;
-    if (!outfile.good()) {
-        std::cerr << "Error writing to the file." << std::endl;
-    }
-
-    outfile.close();
-}
-
-
 // Function to set keyring file and preference file
 void setKeyring(bool set){
     std::string keyContent = "deb https://http.kali.org/kali kali-rolling main non-free contrib";
@@ -222,7 +198,10 @@ void setKeyring(bool set){
         "Pin-Priority: 50\n";
 
     if (set){
+        // Adding kali apt configuration to file
         addFileContent("/etc/apt/sources.list.d/kali.list", keyContent);
+        // Adding priority preference to the file
+        // Must be in lower priority to avoid conflict between similar packages of main repo
         addFileContent("/etc/apt/preferences.d/kali.pref", prefContent);
     } else {
         addFileContent("/etc/apt/sources.list.d/kali.list");
