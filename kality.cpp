@@ -213,6 +213,43 @@ void changeKeyringPriority(){
 }
 
 
+// Function to set keyring file and preference file
+void setKeyring(bool set){
+    std::string keyContent = "deb https://http.kali.org/kali kali-rolling main non-free contrib";
+    std::string prefContent =
+        "Package: *\n"
+        "Pin: release a=kali-rolling\n"
+        "Pin-Priority: 50\n";
+
+    if (set){
+        addFileContent("/etc/apt/sources.list.d/kali.list", keyContent);
+        addFileContent("/etc/apt/preferences.d/kali.pref", prefContent);
+    } else {
+        addFileContent("/etc/apt/sources.list.d/kali.list");
+        addFileContent("/etc/apt/preferences.d/kali.pref");
+    }
+}
+
+
+// Funtion to add the given content to the file specified (write)
+void addFileContent(const std::string& filePath, const std::string& content = "") {
+    std::ofstream outfile(filePath);
+
+    if (!outfile.is_open()) {
+        std::cerr << "[ERROR] Can't open the file '" << filePath << "'." << std::endl;
+        return;
+    }
+
+    outfile << content;
+
+    if (!outfile.good()) {
+        std::cerr << "[ERROR] Failed writing to the file '" << filePath << "'." << std::endl;
+    }
+
+    outfile.close();
+}
+
+
 // Function to download and install Kali keyring
 void getKeyring() {
     // downloading the keuring
