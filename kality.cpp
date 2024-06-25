@@ -16,7 +16,7 @@
 #include <fstream>
 
 
-// ANSI COLOR CODES
+ // ANSI COLOR CODES
 namespace Color {
     const std::string RESET = "\033[0m";
     const std::string RED = "\033[31m";
@@ -61,13 +61,17 @@ int main(int argc, char* argv[]) {
         }
 
         else if (flag == "update" || flag == "u") {
+            setKeyring(true);
             update();
+            setKeyring(false);
         }
 
         else if (flag == "install" || flag == "i") {
             if (argc > 2) {
                 packages = getArgs(argc, argv);  // getting package names
+                setKeyring(true);
                 install(packages);
+                setKeyring(false);
             }
             else {
                 std::cout << "ERROR: Please provide package(s) to install. For help use" << Color::YELLOW << "kalify help" << Color::RESET << std::endl;
@@ -78,7 +82,9 @@ int main(int argc, char* argv[]) {
         else if (flag == "uninstall" || flag == "x") {
             if (argc > 2) {
                 packages = getArgs(argc, argv);
+                setKeyring(true);
                 uninstall(packages);
+                setKeyring(false);
             }
             else {
                 std::cout << "ERROR: Please provide package(s) to uninstall. For help use" << Color::YELLOW << "kalify help" << Color::RESET << std::endl;
@@ -149,29 +155,50 @@ void help() {
 
 
 // Function to update the packages
+// #### TODO: add log file to update only necessary packages
 void update() {
-    std::cout << "Update operation started..." << std::endl;
-    // Update logic here...
+    // the update command
+    int out = std::system("apt-get update -y");
+    if (out != 0) {
+        std::cerr << "[ERROR] Failed to update packages." << std::endl;
+        return;
+    }
+    std::cout << "[INFO] All packages have been successfully updated!" << std::endl;
 }
 
-
+// TODO: Check for a package, if available or not and give user the info
 // Function to install the packages
 void install(std::vector<std::string> pkgs) {
-    std::cout << "Install operation started..." << std::endl;
+    std::string pkgList = "";
     for (const auto& pkg : pkgs) {
-        std::cout << pkg << " ";
+        pkgList += pkg + " ";
     }
-    std::cout << std::endl;
+    // the install command
+    std::string cmd = "apt-get install " + pkgList + "-y";
+    int out = std::system(cmd.c_str());
+    if (out != 0) {
+        std::cerr << "[ERROR] Failed to install packages." << std::endl;
+        return;
+    }
+    std::cout << "[INFO] All packages have been successfully installed!" << std::endl;
 }
 
 
 // Function to uninstall the packages
 void uninstall(std::vector<std::string> pkgs) {
     std::cout << "Uninstall operation started..." << std::endl;
+    std::string pkgList = "";
     for (const auto& pkg : pkgs) {
-        std::cout << pkg << " ";
+        pkgList += pkg + " ";
     }
-    std::cout << std::endl;
+    // the install command
+    std::string cmd = "apt-get remove --purge " + pkgList + "-y";
+    int out = std::system(cmd.c_str());
+    if (out != 0) {
+        std::cerr << "[ERROR] Failed to uninstall packages." << std::endl;
+        return;
+    }
+    std::cout << "[INFO] All packages have been successfully uninstalled!" << std::endl;
 }
 
 
@@ -190,27 +217,30 @@ void removeKeyring(std::string keyringPkg) {
 
 
 // Function to set keyring file and preference file
-void setKeyring(bool set){
+void setKeyring(bool set) {
     std::string keyContent = "deb https://http.kali.org/kali kali-rolling main non-free contrib";
     std::string prefContent =
         "Package: *\n"
         "Pin: release a=kali-rolling\n"
         "Pin-Priority: 50\n";
 
-    if (set){
-        // Adding kali apt configuration to file
+    if (set) {
+        // adding kali apt configuration to file
         addFileContent("/etc/apt/sources.list.d/kali.list", keyContent);
-        // Adding priority preference to the file
-        // Must be in lower priority to avoid conflict between similar packages of main repo
+        // adding priority preference to the file
+        // - must be in lower priority to avoid conflict between similar packages of main repo
         addFileContent("/etc/apt/preferences.d/kali.pref", prefContent);
-    } else {
+        std::cout << "[INFO] Kali keyring: SET" << std::endl;
+    }
+    else {
         addFileContent("/etc/apt/sources.list.d/kali.list");
         addFileContent("/etc/apt/preferences.d/kali.pref");
+        std::cout << "[INFO] Kali keyring: RELEASED" << std::endl;
     }
 }
 
 
-// Funtion to add the given content to the file specified (write)
+// Function to add the given content to the file specified (write)
 void addFileContent(const std::string& filePath, const std::string& content = "") {
     std::ofstream outfile(filePath);
 
@@ -231,7 +261,7 @@ void addFileContent(const std::string& filePath, const std::string& content = ""
 
 // Function to download and install Kali keyring
 void getKeyring() {
-    // downloading the keuring
+    // downloading the keyring
     std::cout << "Downloading and installing Kali keyring..." << std::endl;
     std::string wgetCmd = "wget " + KEYRING_URL;
     if (system(wgetCmd.c_str()) != 0) {
