@@ -37,6 +37,11 @@ void update();
 void install(std::vector<std::string> pkgs);
 void uninstall(std::vector<std::string> pkgs);
 std::vector<std::string> getArgs(int argc, char* argv[]);
+void setKeyring(bool set);
+void getKeyring();
+void removeKeyring(std::string keyringPkg);
+void addFileContent(const std::string& filePath, const std::string& content = "");
+
 
 // KEYRING URL
 const std::string KEYRING_URL = "https://http.kali.org/kali/pool/main/k/kali-archive-keyring/kali-archive-keyring_2024.1_all.deb";
@@ -74,7 +79,7 @@ int main(int argc, char* argv[]) {
                 setKeyring(false);
             }
             else {
-                std::cout << "ERROR: Please provide package(s) to install. For help use" << Color::YELLOW << "kalify help" << Color::RESET << std::endl;
+                std::cout << "ERROR: Please provide package(s) to install. For help use " << Color::YELLOW << "kality help" << Color::RESET << std::endl;
                 exit(-1);
             }
         }
@@ -87,19 +92,19 @@ int main(int argc, char* argv[]) {
                 setKeyring(false);
             }
             else {
-                std::cout << "ERROR: Please provide package(s) to uninstall. For help use" << Color::YELLOW << "kalify help" << Color::RESET << std::endl;
+                std::cout << "ERROR: Please provide package(s) to uninstall. For help use " << Color::YELLOW << "kality help" << Color::RESET << std::endl;
                 exit(-1);
             }
         }
 
         else {  // if no valid flag was found
-            std::cout << "ERROR: Invalid argument(s). For help use" << Color::YELLOW << "kalify help" << Color::RESET << std::endl;
+            std::cout << "ERROR: Invalid argument(s). For help use " << Color::YELLOW << "kality help" << Color::RESET << std::endl;
             exit(-1);
         }
     }
 
     else {  // if no valid arg given
-        std::cout << "ERROR: No flags found. For help use" << Color::YELLOW << "kalify help" << Color::RESET << std::endl;
+        std::cout << "ERROR: No flags found. For help use " << Color::YELLOW << "kality help" << Color::RESET << std::endl;
         exit(-1);
     }
 
@@ -145,7 +150,7 @@ bool isRoot() {
 
 // Function to display the help
 void help() {
-    std::cout << "\nUsage: kalify [options]\n\n";
+    std::cout << "\nUsage: kality [options]\n\n";
     std::cout << "Options:\n";
     std::cout << "  update (u)\t\t\t\tUpdate all installed packages\n";
     std::cout << "  install (i)\tpkg1 pkg2 ... pkgN\tInstall the provided packages if available in the repository\n";
@@ -241,7 +246,7 @@ void setKeyring(bool set) {
 
 
 // Function to add the given content to the file specified (write)
-void addFileContent(const std::string& filePath, const std::string& content = "") {
+void addFileContent(const std::string& filePath, const std::string& content) {
     std::ofstream outfile(filePath);
 
     if (!outfile.is_open()) {
