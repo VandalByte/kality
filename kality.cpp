@@ -1,10 +1,25 @@
 /*
- * Author: Vandal (VandalByte)
+ * Kality - Kali Linux Package Management Tool for Debian Systems
  *
+ * Author: Vandal (VandalByte)
  * GitHub: https://github.com/VandalByte/kality
  * License: GPL-3.0
  *
- * Disclaimer: This code is provided as-is. Use at your own risk.
+ * DISCLAIMER:
+ * This program is provided as-is. Use at your own risk.
+ *
+ * DESCRIPTION:
+ * Kality is a package management tool designed to integrate the Kali Linux
+ * repository into Debian-based systems. It allows installation of packages
+ * from the Kali repository that are not available in the Debian repository,
+ * while ensuring proper handling of keyrings and package preferences.
+ *
+ * USAGE:
+ * - Compile this program using a C++ compiler.
+ * - Execute the compiled program to integrate Kali Linux repository into your
+ *   Debian system.
+ *  
+ * Feel free to check out the official GitHub repository for any queries or issues.
  */
 
 
@@ -28,14 +43,15 @@ namespace Color {
 
 
 // LOGGING MACROS
-#define LOG_INFO(msg)     std::cout << Color::GREEN << "[INFO] " << Color::RESET << msg << Color::RESET << std::endl
-#define LOG_ERROR(msg)    std::cerr << Color::RED << "[ERROR] " << Color::RESET << msg << Color::RESET << std::endl
+#define LOG_INFO(msg) std::cout << Color::GREEN << "[INFO] " << Color::RESET << msg << Color::RESET << std::endl
+#define LOG_ERROR(msg) std::cerr << Color::RED << "[ERROR] " << Color::RESET << msg << Color::RESET << std::endl
 
 
 // FUNCTION PROTOTYPES
 bool isRoot();
 void help();
 void update();
+void purge();
 void install(std::vector<std::string> pkgs);
 void uninstall(std::vector<std::string> pkgs);
 std::vector<std::string> getArgs(int argc, char* argv[]);
@@ -65,7 +81,10 @@ int main(int argc, char* argv[]) {
         // displays help menu and exits
         if (flag == "help" || flag == "h") {
             help();
-            return 0;
+        }
+
+        else if (flag == "purge" || flag == "p") {
+            purge();
         }
 
         else if (flag == "update" || flag == "u") {
@@ -164,7 +183,6 @@ void help() {
 
 
 // Function to update the packages
-// #### TODO: add log file to update only necessary packages
 void update() {
     // the update command
     int out = std::system("apt-get upgrade -y");
@@ -175,7 +193,31 @@ void update() {
     LOG_INFO("All packages have been successfully updated!");
 }
 
-// TODO: Check for a package, if available or not and give user the info
+
+// Function to remove all kality changes
+void purge() {
+    std::string srcFile = "/etc/apt/sources.list.d/kali.list";
+    std::string preFile = "/etc/apt/preferences.d/kali.pref";
+    // removing keyring pkg
+    removeKeyring();
+    // removing the kali.list file
+    if (std::remove(srcFile.c_str()) != 0) {
+        LOG_ERROR("Failed to remove kali.list file.");
+    }
+    // removing the kali.pref file
+    if (std::remove(preFile.c_str()) != 0) {
+        LOG_ERROR("Failed to remove kali.pref file.");
+    }
+    int out = std::system("apt-get update -y");
+    if (out != 0) {
+        LOG_ERROR("Failed to update packages.");
+        return;
+    }
+    LOG_INFO("Kality modified files have been removed!");
+    std::cout << "Now run the following to remove the bin file:\nsudo rm /usr/local/bin/kality";
+}
+
+
 // Function to install the packages
 void install(std::vector<std::string> pkgs) {
     std::string pkgList = "";
@@ -212,9 +254,11 @@ void uninstall(std::vector<std::string> pkgs) {
 
 
 // Function to remove the kali keyring
-void removeKeyring(std::string keyringPkg) {
+void removeKeyring() {
     std::cout << "Removing the Kali keyring from the system...";
-    std::string cmd = "dpkg --purge " + keyringPkg;
+    // std::string cmd = "dpkg --purge " + keyringPkg;
+    // purge command
+    std::string cmd = "dpkg --purge kali-archive-keyring";
 
     int out = std::system(cmd.c_str());
     if (out != 0) {
@@ -237,7 +281,7 @@ void setKeyring(bool set) {
         // adding kali apt configuration to file
         addFileContent("/etc/apt/sources.list.d/kali.list", keyContent);
         // adding priority preference to the file
-        // - must be in lower priority to avoid conflict between similar packages of main repo
+        // : must be in lower priority to avoid conflict between similar packages of main repo
         addFileContent("/etc/apt/preferences.d/kali.pref", prefContent);
         LOG_INFO("Kali keyring: SET");
     }
