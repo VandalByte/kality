@@ -19,16 +19,18 @@
  // ANSI COLOR CODES
 namespace Color {
     const std::string RESET = "\033[0m";
-    const std::string RED = "\033[31m";
-    const std::string GREEN = "\033[32m";
-    const std::string YELLOW = "\033[33m";
-    const std::string BLUE = "\033[34m";
-    const std::string MAGENTA = "\033[35m";
-    const std::string CYAN = "\033[36m";
-    const std::string WHITE = "\033[37m";
-    const std::string BOLD = "\033[1m";
-    const std::string UNDERLINE = "\033[4m";
+    const std::string RED = "\033[31;1m";
+    const std::string GREEN = "\033[32;1m";
+    const std::string YELLOW = "\033[33;1m";
+    const std::string BLUE = "\033[34;1m";
+    const std::string CYAN = "\033[36;1m";
 }
+
+
+// LOGGING MACROS
+#define LOG_INFO(msg)     std::cout << Color::GREEN << "[INFO] " << Color::RESET << msg << Color::RESET << std::endl
+#define LOG_ERROR(msg)    std::cerr << Color::RED << "[ERROR] " << Color::RESET << msg << Color::RESET << std::endl
+
 
 // FUNCTION PROTOTYPES
 bool isRoot();
@@ -40,6 +42,7 @@ std::vector<std::string> getArgs(int argc, char* argv[]);
 void setKeyring(bool set);
 void getKeyring();
 void removeKeyring(std::string keyringPkg);
+bool isKeyringInstalled(const std::string& pkg);
 void addFileContent(const std::string& filePath, const std::string& content = "");
 
 
@@ -52,7 +55,7 @@ int main(int argc, char* argv[]) {
     // check if program is run as root user
     if (!isRoot()) {
         std::cout << "ERROR: Please run the program with root user privileges." << std::endl;
-        exit(-1);
+        return -1;
     }
 
     std::vector<std::string> packages;
@@ -62,13 +65,14 @@ int main(int argc, char* argv[]) {
         // displays help menu and exits
         if (flag == "help" || flag == "h") {
             help();
-            exit(0);
+            return 0;
         }
 
         else if (flag == "update" || flag == "u") {
-            setKeyring(true);
+            getKeyring(); // checking if keyring needs to be installed
+            setKeyring(true); // setting keyring in files
             update();
-            setKeyring(false);
+            setKeyring(false); // removing keyring in files
         }
 
         else if (flag == "install" || flag == "i") {
@@ -79,8 +83,8 @@ int main(int argc, char* argv[]) {
                 setKeyring(false);
             }
             else {
-                std::cout << "ERROR: Please provide package(s) to install. For help use " << Color::YELLOW << "kality help" << Color::RESET << std::endl;
-                exit(-1);
+                LOG_ERROR("Please provide package(s) to install. For help use " + Color::YELLOW + "kality help" + Color::RESET);
+                return -1;
             }
         }
 
@@ -92,20 +96,20 @@ int main(int argc, char* argv[]) {
                 setKeyring(false);
             }
             else {
-                std::cout << "ERROR: Please provide package(s) to uninstall. For help use " << Color::YELLOW << "kality help" << Color::RESET << std::endl;
-                exit(-1);
+                LOG_ERROR("Please provide package(s) to uninstall. For help use " + Color::YELLOW + "kality help" + Color::RESET);
+                return -1;
             }
         }
 
         else {  // if no valid flag was found
-            std::cout << "ERROR: Invalid argument(s). For help use " << Color::YELLOW << "kality help" << Color::RESET << std::endl;
-            exit(-1);
+            LOG_ERROR("Invalid argument(s). For help use " + Color::YELLOW + "kality help" + Color::RESET);
+            return -1;
         }
     }
 
     else {  // if no valid arg given
-        std::cout << "ERROR: No flags found. For help use " << Color::YELLOW << "kality help" << Color::RESET << std::endl;
-        exit(-1);
+        LOG_ERROR("No flags found. For help use " + Color::YELLOW + "kality help" + Color::RESET);
+        return -1;
     }
 
     return 0;
@@ -163,12 +167,12 @@ void help() {
 // #### TODO: add log file to update only necessary packages
 void update() {
     // the update command
-    int out = std::system("apt-get update -y");
+    int out = std::system("apt-get upgrade -y");
     if (out != 0) {
-        std::cerr << "[ERROR] Failed to update packages." << std::endl;
+        LOG_ERROR("Failed to update packages.");
         return;
     }
-    std::cout << "[INFO] All packages have been successfully updated!" << std::endl;
+    LOG_INFO("All packages have been successfully updated!");
 }
 
 // TODO: Check for a package, if available or not and give user the info
@@ -182,10 +186,10 @@ void install(std::vector<std::string> pkgs) {
     std::string cmd = "apt-get install " + pkgList + "-y";
     int out = std::system(cmd.c_str());
     if (out != 0) {
-        std::cerr << "[ERROR] Failed to install packages." << std::endl;
+        LOG_ERROR("Failed to install packages.");
         return;
     }
-    std::cout << "[INFO] All packages have been successfully installed!" << std::endl;
+    LOG_INFO("All packages have been successfully installed!");
 }
 
 
@@ -200,10 +204,10 @@ void uninstall(std::vector<std::string> pkgs) {
     std::string cmd = "apt-get remove --purge " + pkgList + "-y";
     int out = std::system(cmd.c_str());
     if (out != 0) {
-        std::cerr << "[ERROR] Failed to uninstall packages." << std::endl;
+        LOG_ERROR("Failed to uninstall packages.");
         return;
     }
-    std::cout << "[INFO] All packages have been successfully uninstalled!" << std::endl;
+    LOG_INFO("All packages have been successfully uninstalled!");
 }
 
 
@@ -214,10 +218,10 @@ void removeKeyring(std::string keyringPkg) {
 
     int out = std::system(cmd.c_str());
     if (out != 0) {
-        std::cerr << "[ERROR] Failed to remove Kali keyring" << std::endl;
+        LOG_ERROR("Failed to remove Kali keyring.");
         return;
     }
-    std::cout << "[INFO] Kali keyring removed successfully!" << std::endl;
+    LOG_INFO("Kali keyring removed successfully!");
 }
 
 
@@ -235,12 +239,12 @@ void setKeyring(bool set) {
         // adding priority preference to the file
         // - must be in lower priority to avoid conflict between similar packages of main repo
         addFileContent("/etc/apt/preferences.d/kali.pref", prefContent);
-        std::cout << "[INFO] Kali keyring: SET" << std::endl;
+        LOG_INFO("Kali keyring: SET");
     }
     else {
         addFileContent("/etc/apt/sources.list.d/kali.list");
         addFileContent("/etc/apt/preferences.d/kali.pref");
-        std::cout << "[INFO] Kali keyring: RELEASED" << std::endl;
+        LOG_INFO("Kali keyring: RELEASED");
     }
 }
 
@@ -250,14 +254,14 @@ void addFileContent(const std::string& filePath, const std::string& content) {
     std::ofstream outfile(filePath);
 
     if (!outfile.is_open()) {
-        std::cerr << "[ERROR] Can't open the file '" << filePath << "'." << std::endl;
+        LOG_ERROR("Can't open the file '" + Color::BLUE + filePath + Color::RESET + "'");
         return;
     }
 
     outfile << content;
 
     if (!outfile.good()) {
-        std::cerr << "[ERROR] Failed writing to the file '" << filePath << "'." << std::endl;
+        LOG_ERROR("Failed writing to the file '" + Color::BLUE + filePath + Color::RESET + "'");
     }
 
     outfile.close();
@@ -266,24 +270,36 @@ void addFileContent(const std::string& filePath, const std::string& content) {
 
 // Function to download and install Kali keyring
 void getKeyring() {
+    // Check if the keyring package is already installed
+    if (isKeyringInstalled("kali-archive-keyring")) {
+        LOG_INFO("Kali keyring is already installed. Skipping...");
+        return;
+    }
     // downloading the keyring
     std::cout << "Downloading and installing Kali keyring..." << std::endl;
     std::string wgetCmd = "wget " + KEYRING_URL;
     if (system(wgetCmd.c_str()) != 0) {
-        std::cerr << "[ERROR] Failed to download the keyring." << std::endl;
+        LOG_ERROR("Failed to download the keyring.");
         return;
     }
     // installing the keyring
     std::string pkgFile = KEYRING_URL.substr(KEYRING_URL.find_last_of("/") + 1);
     std::string dpkgCmd = "sudo dpkg -i " + pkgFile;
     if (system(dpkgCmd.c_str()) != 0) {
-        std::cerr << "[ERROR] Failed to install the keyring." << std::endl;
+        LOG_ERROR("Failed to install the keyring.");
         return;
     }
     // removing the keyring .deb file after installation
     if (remove(pkgFile.c_str()) != 0) {
-        std::cerr << "[ERROR] Failed to remove the keyring file." << std::endl;
+        LOG_ERROR("Failed to remove the keyring file.");
         return;
     }
-    std::cout << "[INFO] Kali keyring installed successfully." << std::endl;
+    LOG_INFO("Kali keyring installed successfully.");
+}
+
+
+// Function to check if a keyring is installed
+bool isKeyringInstalled(const std::string& pkg) {
+    std::string cmd = "dpkg-query -W -f='${Status}' " + pkg + " 2>/dev/null | grep -q 'install ok installed'";
+    return (system(cmd.c_str()) == 0);
 }
