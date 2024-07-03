@@ -14,11 +14,6 @@
  * from the Kali repository that are not available in the Debian repository,
  * while ensuring proper handling of keyrings and package preferences.
  *
- * USAGE:
- * - Compile this program using a C++ compiler.
- * - Execute the compiled program to integrate Kali Linux repository into your
- *   Debian system.
- *  
  * Feel free to check out the official GitHub repository for any queries or issues.
  */
 
@@ -57,7 +52,7 @@ void uninstall(std::vector<std::string> pkgs);
 std::vector<std::string> getArgs(int argc, char* argv[]);
 void setKeyring(bool set);
 void getKeyring();
-void removeKeyring(std::string keyringPkg);
+void removeKeyring();
 bool isKeyringInstalled(const std::string& pkg);
 void addFileContent(const std::string& filePath, const std::string& content = "");
 
@@ -74,7 +69,9 @@ int main(int argc, char* argv[]) {
         return -1;
     }
 
+    // packages storage
     std::vector<std::string> packages;
+
     // check if any flag provided
     if (argc > 1) {
         std::string flag = argv[1];  // flag option
@@ -82,18 +79,27 @@ int main(int argc, char* argv[]) {
         if (flag == "help" || flag == "h") {
             help();
         }
-
+        // removing kality from system
         else if (flag == "purge" || flag == "p") {
-            purge();
+            // ask for confirmation
+            std::string confirm;
+            std::cout << "Are you sure you want to remove Kalify? (y/n): ";
+            std::getline(std::cin, confirm);
+            if (confirm == "yes" || confirm == "y") {
+                purge();
+            }
+            else {
+                LOG_INFO("\nPurge operation cancelled!");
+            }
         }
-
+        // updating installed packages
         else if (flag == "update" || flag == "u") {
             getKeyring(); // checking if keyring needs to be installed
             setKeyring(true); // setting keyring in files
             update();
             setKeyring(false); // removing keyring in files
         }
-
+        // installing packages
         else if (flag == "install" || flag == "i") {
             if (argc > 2) {
                 packages = getArgs(argc, argv);  // getting package names
@@ -106,7 +112,7 @@ int main(int argc, char* argv[]) {
                 return -1;
             }
         }
-
+        // uninstalling packages
         else if (flag == "uninstall" || flag == "x") {
             if (argc > 2) {
                 packages = getArgs(argc, argv);
@@ -119,18 +125,17 @@ int main(int argc, char* argv[]) {
                 return -1;
             }
         }
-
-        else {  // if no valid flag was found
+        // if no valid flag was found
+        else {
             LOG_ERROR("Invalid argument(s). For help use " + Color::YELLOW + "kality help" + Color::RESET);
             return -1;
         }
     }
-
-    else {  // if no valid arg given
+    // if no valid arg given
+    else {
         LOG_ERROR("No flags found. For help use " + Color::YELLOW + "kality help" + Color::RESET);
         return -1;
     }
-
     return 0;
 }
 
@@ -178,6 +183,7 @@ void help() {
     std::cout << "  update (u)\t\t\t\tUpdate all installed packages\n";
     std::cout << "  install (i)\tpkg1 pkg2 ... pkgN\tInstall the provided packages if available in the repository\n";
     std::cout << "  uninstall (x)\tpkg1 pkg2 ... pkgN\tUninstall the provided packages if found installed\n";
+    std::cout << "  purge (p)\t\t\t\tRemoves kality from the system\n\n";
     std::cout << "  help (h)\t\t\t\tDisplays this help message and exits\n\n";
 }
 
