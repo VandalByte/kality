@@ -1,5 +1,5 @@
 /*
- * Kality - Kali Linux Package Management Tool for Debian Systems
+ * Kality - Kali Linux package management tool for Debian systems
  *
  * Author: Vandal (VandalByte)
  * GitHub: https://github.com/VandalByte/kality
