@@ -65,7 +65,7 @@ const std::string KEYRING_URL = "https://http.kali.org/kali/pool/main/k/kali-arc
 int main(int argc, char* argv[]) {
     // check if program is run as root user
     if (!isRoot()) {
-        std::cout << "ERROR: Please run the program with root user privileges." << std::endl;
+        LOG_ERROR("Please run with sudo privileges.\n");
         return -1;
     }
 
@@ -89,7 +89,8 @@ int main(int argc, char* argv[]) {
                 purge();
             }
             else {
-                LOG_INFO("\nPurge operation cancelled!");
+                std::cout << std::endl;
+                LOG_INFO("Purge operation cancelled!");
             }
         }
         // updating installed packages
@@ -178,13 +179,20 @@ bool isRoot() {
 
 // Function to display the help
 void help() {
+    std::cout << " _  __     _ _ _        \n"
+        "| |/ /__ _| (_) |_ _  _ \n"
+        "| ' </ _` | | |  _| || |\n"
+        "|_|\\_\\__,_|_|_|\\__|\\_, |   By " + Color::CYAN + "Vandal\n" + Color::RESET + ""
+        "                   |__/ \n";
     std::cout << "\nUsage: kality [options]\n\n";
-    std::cout << "Options:\n";
-    std::cout << "  update (u)\t\t\t\tUpdate all installed packages\n";
-    std::cout << "  install (i)\tpkg1 pkg2 ... pkgN\tInstall the provided packages if available in the repository\n";
-    std::cout << "  uninstall (x)\tpkg1 pkg2 ... pkgN\tUninstall the provided packages if found installed\n";
-    std::cout << "  purge (p)\t\t\t\tRemoves kality from the system\n\n";
-    std::cout << "  help (h)\t\t\t\tDisplays this help message and exits\n\n";
+    std::cout << Color::GREEN + "OPTIONS:\n\n" + Color::RESET;
+    std::cout << "  update (u)\t\t\tUpdate all installed packages\n";
+    std::cout << "  install (i)\t\t\tInstall the provided packages if available in the repository\n";
+    std::cout << Color::YELLOW + "  \t\t\t\te.g. kality install pkg1 pkg2 ... pkgN\t\n" + Color::RESET;
+    std::cout << "  uninstall (x)\t\t\tUninstall the provided packages if found installed\n";
+    std::cout << Color::YELLOW + "  \t\t\t\te.g. kality uninstall pkg1 pkg2 ... pkgN\t\n" + Color::RESET;
+    std::cout << "  purge (p)\t\t\tRemoves kality from the system\n";
+    std::cout << "  help (h)\t\t\tDisplays this help message and exits\n\n";
 }
 
 
@@ -220,7 +228,7 @@ void purge() {
         return;
     }
     LOG_INFO("Kality modified files have been removed!");
-    std::cout << "Now run the following to remove the bin file:\nsudo rm /usr/local/bin/kality";
+    std::cout << Color::BLUE + "[NOTE]" + Color::RESET + " Now run the following to remove the bin file:\n\tsudo rm /usr/local/bin/kality\n";
 }
 
 
@@ -243,16 +251,21 @@ void install(std::vector<std::string> pkgs) {
 
 // Function to uninstall the packages
 void uninstall(std::vector<std::string> pkgs) {
-    std::cout << "Uninstall operation started..." << std::endl;
     std::string pkgList = "";
     for (const auto& pkg : pkgs) {
         pkgList += pkg + " ";
     }
     // the install command
-    std::string cmd = "apt-get remove --purge " + pkgList + "-y";
-    int out = std::system(cmd.c_str());
+    std::string cmdPurge = "apt-get remove --purge " + pkgList + "-y";
+    int out = std::system(cmdPurge.c_str());
     if (out != 0) {
         LOG_ERROR("Failed to uninstall packages.");
+        return;
+    }
+    std::string cmdAutoremove = "apt-get autoremove -y";
+    out = std::system(cmdAutoremove.c_str());
+    if (out != 0) {
+        LOG_ERROR("Failed to remove dependency packages.");
         return;
     }
     LOG_INFO("All packages have been successfully uninstalled!");
@@ -261,7 +274,7 @@ void uninstall(std::vector<std::string> pkgs) {
 
 // Function to remove the kali keyring
 void removeKeyring() {
-    std::cout << "Removing the Kali keyring from the system...";
+    LOG_INFO("Removing the Kali keyring from the system...");
     // std::string cmd = "dpkg --purge " + keyringPkg;
     // purge command
     std::string cmd = "dpkg --purge kali-archive-keyring";
@@ -326,7 +339,7 @@ void getKeyring() {
         return;
     }
     // downloading the keyring
-    std::cout << "Downloading and installing Kali keyring..." << std::endl;
+    LOG_INFO("Downloading and installing Kali keyring...");
     std::string wgetCmd = "wget " + KEYRING_URL;
     if (system(wgetCmd.c_str()) != 0) {
         LOG_ERROR("Failed to download the keyring.");
