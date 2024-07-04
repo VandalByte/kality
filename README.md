@@ -16,7 +16,7 @@ Feel free to give it a try! For those wondering why it's written in C++ instead 
 **PS:** I really think you should try it out in a virtual machine (VM). While it's usually fine, there's still a 1% chance it could mess up your system. Just a heads up, don't blame me if something goes wrong. I'll deny it.
 
 <div align="center" style="border: 1px solid gray">
-  <img width=90% src="https://raw.githubusercontent.com/VandalByte/kality/main/assets/kality-showcase.png" alt="Screenshot">
+  <img src="https://raw.githubusercontent.com/VandalByte/kality/main/assets/kality-showcase.png" alt="Screenshot">
 </div>
 
 
