@@ -3,9 +3,9 @@
 </div>
 
 ### 🤷‍♂️ About
-Kality is a somewhat decent package manager I developed that can download the required tools from Kali Linux repository into any Debian system without any hassle.
+Kality is a somewhat decent package manager I developed in C++ that can download the required tools from Kali Linux repository into any Debian system without any hassle. Feel free to give it a try!
 
-Feel free to give it a try! For those wondering why it's written in C++ instead of Python, well, I just felt like it. There's also a [TODO](https://github.com/VandalByte/kality/blob/main/TODO.md) file where I've outlined plans to further optimize this tool, so feel free to check it out. If you're interested in contributing, well that will be really great.
+There's also a [TODO](https://github.com/VandalByte/kality/blob/main/TODO.md) file where I've outlined plans to further optimize this tool, so feel free to check it out. If you're interested in contributing, well that's really great, check out the [contributing](https://github.com/VandalByte/kality/blob/main/CONTRIBUTING.md) guidelines to know more.
 
 <span style="color:red"><b>IMPORTANT</b></span> ➜ You should try it out in a virtual machine (VM) first, it's usually fine, there's still a 1% chance it could mess up your system. Just a heads up.
 
