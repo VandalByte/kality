@@ -2,7 +2,7 @@
   <img src="https://raw.githubusercontent.com/VandalByte/kality/main/assets/banner.png" alt="Banner">
 </div>
 
-# 🤷‍♂️ About
+## 🤷‍♂️ About
 Kality is a neat package manager I put together in C++ to make it easier for you to install tools from the Kali Linux repository on any Debian-based system. It works by adding the Kali repo to your APT sources with a low priority, this lets you access those kali tools while avoiding version clashes with similar packages from your main distribution. Feel free to give it a try!
 
 There's also a [TODO](https://github.com/VandalByte/kality/blob/main/TODO.md) file where I've outlined plans to further optimize this tool, so feel free to check it out. If you're interested in contributing, well that's really great, check out the [contributing](https://github.com/VandalByte/kality/blob/main/CONTRIBUTING.md) guidelines to know more.
@@ -15,13 +15,13 @@ There's also a [TODO](https://github.com/VandalByte/kality/blob/main/TODO.md) fi
 </div>
 
 
-# 🛠️ Prerequisites
+## 🛠️ Prerequisites
 To compile and to ensure proper working of the script, you need to have the following packages installed on your system:
 ```bash
 sudo apt install g++ make wget
 ```
 
-# 🚀 Compilation and Installation
+## 🚀 Compilation and Installation
 
 First, clone the kality repository and navigate into it.
 ```bash
@@ -42,7 +42,7 @@ kality update
 You're all set! Check it out.
 
 
-# 📋 How to use?
+## 📋 How to use?
 For the current release you can install, remove and update packages with kality.
 
 ```bash
