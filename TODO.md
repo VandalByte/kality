@@ -8,5 +8,8 @@
 
 - [ ] Test if dependency packages installed for a pkg causes issues
 
-- [ ] A way to download the latest kali keyring .deb file from -
+- [x] A way to download the latest kali keyring .deb file from -
     https://http.kali.org/kali/pool/main/k/kali-archive-keyring/
+
+- [ ] Download files curl, wget into /tmp
+- [ ] Try removing sudo constraint so system asks for it

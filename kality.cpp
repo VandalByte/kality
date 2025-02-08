@@ -60,7 +60,7 @@ void add_file_content(const string& filePath, const string& content = "");
 string find_deb_url(const string &html_content, const string &base_url);
 
 // KEYRING URL
-const string KEYRING_URL = "https://http.kali.org/kali/pool/main/k/kali-archive-keyring/kali-archive-keyring_2024.1_all.deb";
+const string KEYRING_BASE_URL = "https://http.kali.org/kali/pool/main/k/kali-archive-keyring/";
 
 
 // MAIN RUNNER
@@ -193,13 +193,13 @@ bool is_root() {
 
 // Function to display the help
 void help() {
-    cout << " _  __     _ _ _        \n"
-        "| |/ /__ _| (_) |_ _  _ \n"
-        "| ' </ _` | | |  _| || |\n"
-        "|_|\\_\\__,_|_|_|\\__|\\_, |   By " + Color::CYAN + "Vandal\n" + Color::RESET + ""
-        "                   |__/ \n";
-    cout << "\nUsage: kality [options]\n\n";
-    cout << Color::GREEN + "OPTIONS:\n\n" + Color::RESET;
+    cout << "  _  __     _ _ _        \n"
+        " | |/ /__ _| (_) |_ _  _ \n"
+        " | ' </ _` | | |  _| || |\n"
+        " |_|\\_\\__,_|_|_|\\__|\\_, |   By " + Color::CYAN + "Vandal\n" + Color::RESET + ""
+        "                    |__/ \n";
+    cout << "\n Usage: kality [options]\n\n";
+    cout << Color::GREEN + " OPTIONS:\n\n" + Color::RESET;
     cout << "  update (u)\t\t\tUpdate all installed packages\n";
     cout << "  install (i)\t\t\tInstall the provided packages if available in the repository\n";
     cout << Color::YELLOW + "  \t\t\t\te.g. kality install pkg1 pkg2 ... pkgN\t\n" + Color::RESET;
@@ -242,7 +242,8 @@ void purge() {
         return;
     }
     LOG_INFO("Kality modified files have been removed!");
-    cout << Color::BLUE + "[NOTE]" + Color::RESET + " Now run the following to remove the bin file:\n\tsudo rm /usr/local/bin/kality\n";
+    cout << Color::BLUE + "[NOTE]" + Color::RESET + " Now run the following to remove the bin file:\n";
+    cout << Color::YELLOW + "       sudo rm /usr/local/bin/kality\n" + Color::RESET;
 }
 
 
@@ -352,21 +353,49 @@ void get_keyring() {
         LOG_INFO("Kali keyring is already installed. Skipping...");
         return;
     }
-    // downloading the keyring
+
+    // Latest keyring check from the web page
+    LOG_INFO("Finding the latest Kali keyring...");
+    string temp_filename = "temp_keyring_page.html";
+    string KEYRING_URL;
+    string curl_cmd = "curl -s " + KEYRING_BASE_URL + " -o " + temp_filename;
+    int res = system(curl_cmd.c_str());
+
+    // Check if curl command was successful
+    if (res == 0) {
+        ifstream fin(temp_filename);
+        if (!fin) {
+            LOG_ERROR("Failed to open temp keyring page for parsing.");
+            return;
+        }
+
+        // Read the content of the downloaded web page into a string
+        string html_content((istreambuf_iterator<char>(fin)), istreambuf_iterator<char>());
+        fin.close();
+
+        // Find the .deb file URL by concatenating the base URL with the .deb file path
+        KEYRING_URL = find_deb_url(html_content, KEYRING_BASE_URL); // deb file URL
+        remove(temp_filename.c_str());
+    } else {
+        LOG_ERROR("Failed to download the webpage using curl.");
+        return;
+    }
+    
+    // Downloading the keyring
     LOG_INFO("Downloading and installing Kali keyring...");
     string wgetCmd = "wget " + KEYRING_URL;
     if (system(wgetCmd.c_str()) != 0) {
         LOG_ERROR("Failed to download the keyring.");
         return;
     }
-    // installing the keyring
+    // Installing the keyring
     string pkgFile = KEYRING_URL.substr(KEYRING_URL.find_last_of("/") + 1);
     string dpkgCmd = "sudo dpkg -i " + pkgFile;
     if (system(dpkgCmd.c_str()) != 0) {
         LOG_ERROR("Failed to install the keyring.");
         return;
     }
-    // removing the keyring .deb file after installation
+    // Removing the keyring .deb file after installation
     if (remove(pkgFile.c_str()) != 0) {
         LOG_ERROR("Failed to remove the keyring file.");
         return;
