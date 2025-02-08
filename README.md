@@ -1,42 +1,48 @@
 <div align="center" width=90%>
   <img src="https://raw.githubusercontent.com/VandalByte/kality/main/assets/banner.png" alt="Banner">
 </div>
+<br>
+Kality is a neat package manager 📦 I put together in C++ to make it easier for you to install tools from the Kali Linux repository on any Debian-based system. It works by adding the Kali repo to your APT sources with a low priority, this lets you access those kali tools while avoiding version clashes with similar packages from your main distribution. Feel free to give it a try and Consider giving this project a star ⭐ if you liked it 🤗
 
-## 🤷‍♂️ About
-Kality is a neat package manager I put together in C++ to make it easier for you to install tools from the Kali Linux repository on any Debian-based system. It works by adding the Kali repo to your APT sources with a low priority, this lets you access those kali tools while avoiding version clashes with similar packages from your main distribution. Feel free to give it a try!
+## 🤷‍♂️ Why Kality?
+
+- **Easy to use:** Building your own pentest lab? Easily download the tools you need quickly.
+- **Made as safe as possible:** The Kali keyring is only active while running Kality.
+  - This ensures it doesn't interfere with your regular APT operations.
+  - The priority settings prevent clashes by prioritizing your native repository packages over Kali’s.
+- **Access to pentest tools:** Get access to nearly all the essential pentest tools available.
+
+<div align="center" style="border: 1px solid gray">
+  <img src="https://raw.githubusercontent.com/VandalByte/kality/main/assets/kality-showcase.png" alt="Screenshot">
+</div><br>
 
 There's also a [TODO](https://github.com/VandalByte/kality/blob/main/TODO.md) file where I've outlined plans to further optimize this tool, so feel free to check it out. If you're interested in contributing, well that's really great, check out the [contributing](https://github.com/VandalByte/kality/blob/main/CONTRIBUTING.md) guidelines to know more.
 
 > [!IMPORTANT]
-> You should try it out in a virtual machine (VM) first, it's usually fine, there's still a 1% chance it could mess up your system. Just a heads up.
-
-<div align="center" style="border: 1px solid gray">
-  <img src="https://raw.githubusercontent.com/VandalByte/kality/main/assets/kality-showcase.png" alt="Screenshot">
-</div>
+> Try it out in a virtual machine (VM) first. It’s mostly safe, but there’s a small chance it could cause issues with your system.
 
 
-## 🛠️ Prerequisites
+## ⚙️ Installation
+
+### Prerequisites
+
 To compile and to ensure proper working of the script, you need to have the following packages installed on your system:
-```bash
-sudo apt install g++ make wget
+```sh
+sudo apt-get install g++ make wget curl
 ```
-
-## 🚀 Compilation and Installation
-
+### Compile from Source
 First, clone the kality repository and navigate into it.
-```bash
+```sh
 git clone https://github.com/VandalByte/kality.git
+cd kality
 ```
-Now, compile the code and place the binary file in `/usr/local/bin/` for system-wide access.
-```bash
+Now, compile the code and place the binary file in `/usr/local/bin/` for system-wide access and give executable permission to the binary.
+```sh
 sudo g++ kality.cpp -o /usr/local/bin/kality
-```
-Now, give executable permission to the file.
-```bash
 sudo chmod +x /usr/local/bin/kality
 ```
-Now run the update to install the keyring to the system.
-```bash
+Finally, run the update to install the keyring into your system.
+```sh
 kality update
 ```
 You're all set! Check it out.
@@ -64,7 +70,3 @@ kality help
 # you installed will still be there, so remember to uninstall them first.
 kality purge
 ```
-
-# 💡 What's Next?
-
-I'm still trying to finish up my TODO list and add the rest of the functions.
