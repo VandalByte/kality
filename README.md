@@ -1,8 +1,8 @@
 <div align="center" width=90%>
   <img src="https://raw.githubusercontent.com/VandalByte/kality/main/assets/banner.png" alt="Banner">
 </div>
-<br>
-Kality is a neat package manager 📦 I put together in C++ to make it easier for you to install tools from the Kali Linux repository on any Debian-based system. It works by adding the Kali repo to your APT sources with a low priority, this lets you access those kali tools while avoiding version clashes with similar packages from your main distribution. Feel free to give it a try and Consider giving this project a star ⭐ if you liked it 🤗
+
+**Kality** is a neat package manager 📦 I put together in C++ to make it easier for you to install tools from the Kali Linux repository on any Debian-based system. It works by adding the Kali repo to your APT sources with a low priority, this lets you access those kali tools while avoiding version clashes with similar packages from your main distribution. Feel free to give it a try and Consider giving this project a star ⭐ if you liked it 🤗
 
 ## 🤷‍♂️ Why Kality?
 
