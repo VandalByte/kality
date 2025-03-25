@@ -52,14 +52,14 @@ You're all set! Check it out.
 For the current release you can install, remove and update packages with kality.
 
 ```bash
-# EXAMPLE: Updating packages
+# EXAMPLE: Updating the packages
 kality update
 
-# EXAMPLE: Installing packages
+# EXAMPLE: Installing the packages
 # Here I'm installing hashcat and John the Ripper.
 kality install hashcat john
 
-# EXAMPLE: Uninstalling packages
+# EXAMPLE: Uninstalling the packages
 kality uninstall hashcat john
 
 # EXAMPLE: Displaying the help menu
